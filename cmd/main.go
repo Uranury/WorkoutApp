@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/Uranury/WorkoutApp/config"
-	"github.com/Uranury/WorkoutApp/internal/api"
 	"github.com/Uranury/WorkoutApp/internal/db"
+	"github.com/Uranury/WorkoutApp/internal/handlers"
 	"github.com/Uranury/WorkoutApp/internal/repositories"
 	"github.com/Uranury/WorkoutApp/internal/services"
 	"github.com/gin-gonic/gin"
@@ -26,7 +26,7 @@ func main() {
 
 	newUserRepo := repositories.NewUserRepository(database)
 	newUserService := services.NewUserService(newUserRepo)
-	newUserHandler := api.NewUserHandler(newUserService)
+	newUserHandler := handlers.NewUserHandler(newUserService)
 
 	router.POST("/signup", newUserHandler.Signup)
 	router.POST("/login", newUserHandler.Login)
