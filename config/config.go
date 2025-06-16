@@ -17,8 +17,8 @@ func Load() *Config {
 	_ = loadEnv()
 
 	cfg := &Config{
-		Port:      getEnv("PORT", "8080"),
-		DbUrl:     getEnv("DATABASE_URL", ""),
+		Port:      getEnv("PORT", "4040"),
+		DbUrl:     getEnv("POSTGRES_DSN", ""),
 		JWTSecret: getEnv("JWT_SECRET", ""),
 	}
 

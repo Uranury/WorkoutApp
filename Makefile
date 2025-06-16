@@ -1,7 +1,7 @@
 run:
 	go run .
-	
-create mig:
+
+create-mig:
 	migrate create -ext sql -dir internal/db/migrations -seq $(name)
 
 migrate-up:
