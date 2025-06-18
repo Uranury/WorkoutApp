@@ -5,20 +5,16 @@ import (
 	"strings"
 
 	"github.com/Uranury/WorkoutApp/internal/auth"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"golang.org/x/net/context"
 )
 
-type contextKey string
-
-var claimsKey = contextKey("claimsKey")
-
-func JWTAuth(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		authHeader := req.Header.Get("Authorization")
+func JWTAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
 
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
 
@@ -26,17 +22,24 @@ func JWTAuth(next http.Handler) http.Handler {
 
 		claims, err := auth.VerifyJWT(tokenString)
 		if err != nil {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
 
-		ctx := context.WithValue(req.Context(), claimsKey, claims)
-		next.ServeHTTP(w, req.WithContext(ctx))
-	})
+		// В Gin обычно кладут в context через `c.Set`
+		c.Set("claims", claims)
+
+		c.Next()
+	}
 }
 
-func GetUserID(ctx context.Context) (uuid.UUID, bool) {
-	claims, ok := ctx.Value(claimsKey).(auth.Claims)
+func GetUserID(c *gin.Context) (uuid.UUID, bool) {
+	claimsVal, exists := c.Get("claims")
+	if !exists {
+		return uuid.UUID{}, false
+	}
+
+	claims, ok := claimsVal.(auth.Claims)
 	if !ok {
 		return uuid.UUID{}, false
 	}
@@ -59,8 +62,13 @@ func GetUserID(ctx context.Context) (uuid.UUID, bool) {
 	return id, true
 }
 
-func GetUserRole(ctx context.Context) (auth.Role, bool) {
-	claims, ok := ctx.Value(claimsKey).(auth.Claims)
+func GetUserRole(c *gin.Context) (auth.Role, bool) {
+	claimsVal, exists := c.Get("claims")
+	if !exists {
+		return "", false
+	}
+
+	claims, ok := claimsVal.(auth.Claims)
 	if !ok {
 		return "", false
 	}

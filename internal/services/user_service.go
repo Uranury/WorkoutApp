@@ -15,10 +15,10 @@ import (
 )
 
 type UserService struct {
-	userRepo repositories.IUserRepository
+	userRepo repositories.UserRepository
 }
 
-func NewUserService(userrepo repositories.IUserRepository) *UserService {
+func NewUserService(userrepo repositories.UserRepository) *UserService {
 	return &UserService{userRepo: userrepo}
 }
 
@@ -96,11 +96,11 @@ func (s *UserService) LoginUser(username string, password string) (string, error
 
 func (s *UserService) GetUsers() ([]models.User, error) {
 	users, err := s.userRepo.GetUsers()
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, apperror.ErrNoUsersFound
-		}
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, apperror.ErrDatabaseError
+	}
+	if len(users) == 0 {
+		return []models.User{}, nil
 	}
 
 	return users, nil

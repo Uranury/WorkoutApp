@@ -6,6 +6,7 @@ import (
 
 	"github.com/Uranury/WorkoutApp/config"
 	"github.com/Uranury/WorkoutApp/internal/db"
+	"github.com/Uranury/WorkoutApp/internal/middleware"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -22,9 +23,15 @@ func main() {
 	router := gin.Default()
 
 	UserHandler := InitUserHandler(database)
+	ExerciseHandler := InitExerciseHandler(database)
 
 	router.POST("/signup", UserHandler.Signup)
 	router.POST("/login", UserHandler.Login)
+	router.GET("/users", UserHandler.GetUsers)
+	router.GET("/exercises", ExerciseHandler.GetExercises)
+
+	protected := router.Group("/", middleware.JWTAuth())
+	protected.POST("/exercises", ExerciseHandler.CreateExercise)
 
 	log.Printf("Listening on port %s...", os.Getenv("LISTEN_ADDR"))
 	if err := router.Run(os.Getenv("LISTEN_ADDR")); err != nil {

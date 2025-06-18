@@ -45,6 +45,11 @@ var (
 		Message:    "no users yet",
 		StatusCode: http.StatusNotFound,
 	}
+
+	ErrExerciseAlreadyExists = &AppError{
+		Message:    "exercise already exists",
+		StatusCode: http.StatusConflict,
+	}
 )
 
 // Generic errors
@@ -67,5 +72,15 @@ var (
 	ErrGenerateToken = &AppError{
 		Message:    "failed to generate token",
 		StatusCode: http.StatusInternalServerError,
+	}
+
+	ErrBadRequest = &AppError{
+		Message:    "invalid request",
+		StatusCode: http.StatusBadRequest,
+	}
+
+	ErrUnauthorized = &AppError{
+		Message:    "unauthorized",
+		StatusCode: http.StatusUnauthorized,
 	}
 )

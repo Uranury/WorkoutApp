@@ -12,3 +12,9 @@ func InitUserHandler(db *sqlx.DB) *handlers.UserHandler {
 	userService := services.NewUserService(userRepo)
 	return handlers.NewUserHandler(userService)
 }
+
+func InitExerciseHandler(db *sqlx.DB) *handlers.ExerciseHandler {
+	exerciseRepo := repositories.NewExerciseRepository(db)
+	exerciseService := services.NewExerciseService(exerciseRepo)
+	return handlers.NewExerciseHandler(exerciseService)
+}

@@ -6,23 +6,23 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type IUserRepository interface {
+type UserRepository interface {
 	GetUserByEmail(email string) (*models.User, error)
-	GetUserById(userid uuid.UUID) (*models.User, error)
+	GetUserByID(userID uuid.UUID) (*models.User, error)
 	GetUserByUsername(username string) (*models.User, error)
 	CreateUser(user *models.User) error
 	GetUsers() ([]models.User, error)
 }
 
-type UserRepository struct {
+type userRepository struct {
 	database *sqlx.DB
 }
 
-func NewUserRepository(db *sqlx.DB) *UserRepository {
-	return &UserRepository{database: db}
+func NewUserRepository(db *sqlx.DB) *userRepository {
+	return &userRepository{database: db}
 }
 
-func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
+func (r *userRepository) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 	if err := r.database.Get(&user, "SELECT * FROM users WHERE email = $1", email); err != nil {
 		return nil, err
@@ -30,15 +30,15 @@ func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) GetUserById(userid uuid.UUID) (*models.User, error) {
+func (r *userRepository) GetUserByID(userID uuid.UUID) (*models.User, error) {
 	var user models.User
-	if err := r.database.Get(&user, "SELECT * FROM users WHERE id = $1", userid); err != nil {
+	if err := r.database.Get(&user, "SELECT * FROM users WHERE id = $1", userID); err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
+func (r *userRepository) GetUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	if err := r.database.Get(&user, "SELECT * FROM users WHERE username = $1", username); err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 	return &user, nil
 }
 
-func (r *UserRepository) CreateUser(user *models.User) error {
+func (r *userRepository) CreateUser(user *models.User) error {
 	_, err := r.database.Exec(
 		`INSERT INTO users (id, username, email, password_hash, created_at) VALUES ($1, $2, $3, $4, $5)`,
 		user.ID, user.Username, user.Email, user.PasswordHash, user.CreatedAt,
@@ -57,7 +57,7 @@ func (r *UserRepository) CreateUser(user *models.User) error {
 	return nil
 }
 
-func (r *UserRepository) GetUsers() ([]models.User, error) {
+func (r *userRepository) GetUsers() ([]models.User, error) {
 	var users []models.User
 	err := r.database.Select(&users, "SELECT * FROM users")
 	return users, err

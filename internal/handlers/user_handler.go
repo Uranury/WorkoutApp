@@ -13,11 +13,11 @@ type UserHandler struct {
 	userService *services.UserService
 }
 
-func NewUserHandler(userservice *services.UserService) *UserHandler {
-	return &UserHandler{userService: userservice}
+func NewUserHandler(userService *services.UserService) *UserHandler {
+	return &UserHandler{userService: userService}
 }
 
-func (h *UserHandler) handleError(c *gin.Context, err error) {
+func HandleError(c *gin.Context, err error) {
 	if appErr, ok := err.(*apperror.AppError); ok {
 		c.JSON(appErr.StatusCode, gin.H{"error": appErr.Message})
 	} else {
@@ -37,7 +37,7 @@ func (h *UserHandler) Signup(c *gin.Context) {
 	user := req.ToUser()
 
 	if err := h.userService.CreateUser(user); err != nil {
-		h.handleError(c, err)
+		HandleError(c, err)
 		return
 	}
 
@@ -54,9 +54,19 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	token, err := h.userService.LoginUser(userlogin.Username, userlogin.Password)
 	if err != nil {
-		h.handleError(c, err)
+		HandleError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func (h *UserHandler) GetUsers(c *gin.Context) {
+	users, err := h.userService.GetUsers()
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }
