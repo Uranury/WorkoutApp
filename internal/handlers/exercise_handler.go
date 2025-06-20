@@ -4,8 +4,6 @@ import (
 	"net/http"
 
 	"github.com/Uranury/WorkoutApp/internal/apperror"
-	"github.com/Uranury/WorkoutApp/internal/auth"
-	"github.com/Uranury/WorkoutApp/internal/middleware"
 	"github.com/Uranury/WorkoutApp/internal/models"
 	"github.com/Uranury/WorkoutApp/internal/services"
 	"github.com/gin-gonic/gin"
@@ -20,7 +18,8 @@ func NewExerciseHandler(exerciseService *services.ExerciseService) *ExerciseHand
 }
 
 func (h *ExerciseHandler) GetExercises(c *gin.Context) {
-	exercises, err := h.exerciseService.GetExercises()
+	muscleGroup := c.Query("muscle_group")
+	exercises, err := h.exerciseService.GetExercises(muscleGroup)
 	if err != nil {
 		HandleError(c, err)
 		return
@@ -29,11 +28,15 @@ func (h *ExerciseHandler) GetExercises(c *gin.Context) {
 }
 
 func (h *ExerciseHandler) CreateExercise(c *gin.Context) {
-	userRole, _ := middleware.GetUserRole(c)
-	if userRole != auth.Admin {
-		HandleError(c, apperror.ErrUnauthorized)
-		return
-	}
+
+	/*
+		userRole, _ := middleware.GetUserRole(c)
+		if userRole != auth.Admin {
+			HandleError(c, apperror.ErrUnauthorized)
+			return
+		}
+	*/
+
 	var exerciseRequest models.ExerciseCreateRequest
 	if err := c.ShouldBindJSON(&exerciseRequest); err != nil {
 		HandleError(c, apperror.ErrBadRequest)

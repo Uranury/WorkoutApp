@@ -22,51 +22,52 @@ func NewUserService(userrepo repositories.UserRepository) *UserService {
 	return &UserService{userRepo: userrepo}
 }
 
-func (s *UserService) CreateUser(user *models.User) error {
-	existingUser, err := s.userRepo.GetUserByEmail(user.Email)
+func (s *UserService) CreateUser(username, email, plainPassword string) (*models.User, error) {
+	username = strings.TrimSpace(username)
+	email = strings.TrimSpace(email)
+	plainPassword = strings.TrimSpace(plainPassword)
+
+	if username == "" || email == "" || plainPassword == "" {
+		return nil, apperror.ErrInvalidCredentials
+	}
+
+	existingUser, err := s.userRepo.GetUserByEmail(email)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return apperror.ErrDatabaseError
+		return nil, apperror.ErrDatabaseError
 	}
 	if existingUser != nil {
-		return apperror.ErrEmailAlreadyInUse
+		return nil, apperror.ErrEmailAlreadyInUse
 	}
 
-	existingUser, err = s.userRepo.GetUserByUsername(user.Username)
+	existingUser, err = s.userRepo.GetUserByUsername(username)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return apperror.ErrDatabaseError
+		return nil, apperror.ErrDatabaseError
 	}
 	if existingUser != nil {
-		return apperror.ErrUsernameAlreadyInUse
-	}
-
-	// Generate UUID for the user
-	user.ID = uuid.New()
-
-	plainPassword := strings.TrimSpace(user.PasswordHash)
-	if plainPassword == "" {
-		return apperror.ErrInvalidCredentials
+		return nil, apperror.ErrUsernameAlreadyInUse
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
 	if err != nil {
-		return apperror.ErrHashPassword
+		return nil, apperror.ErrHashPassword
 	}
-	user.PasswordHash = string(hashedPassword)
 
 	now := time.Now()
-	user.CreatedAt = now
-	user.UpdatedAt = now
-
-	// Set default role if not set
-	if user.Role == "" {
-		user.Role = auth.User
+	user := &models.User{
+		ID:           uuid.New(),
+		Username:     username,
+		Email:        email,
+		PasswordHash: string(hashedPassword),
+		CreatedAt:    now,
+		UpdatedAt:    now,
+		Role:         auth.User,
 	}
 
 	if err := s.userRepo.CreateUser(user); err != nil {
-		return apperror.ErrDatabaseError
+		return nil, apperror.ErrDatabaseError
 	}
 
-	return nil
+	return user, nil
 }
 
 func (s *UserService) LoginUser(username string, password string) (string, error) {

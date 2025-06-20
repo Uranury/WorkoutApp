@@ -18,3 +18,9 @@ func InitExerciseHandler(db *sqlx.DB) *handlers.ExerciseHandler {
 	exerciseService := services.NewExerciseService(exerciseRepo)
 	return handlers.NewExerciseHandler(exerciseService)
 }
+
+func InitWorkoutHandler(db *sqlx.DB) *handlers.WorkoutHandler {
+	workoutRepo := repositories.NewWorkoutRepository(db)
+	workoutService := services.NewWorkoutService(workoutRepo)
+	return handlers.NewWorkoutHandler(workoutService)
+}

@@ -24,6 +24,7 @@ func main() {
 
 	UserHandler := InitUserHandler(database)
 	ExerciseHandler := InitExerciseHandler(database)
+	WorkoutHandler := InitWorkoutHandler(database)
 
 	router.POST("/signup", UserHandler.Signup)
 	router.POST("/login", UserHandler.Login)
@@ -32,6 +33,8 @@ func main() {
 
 	protected := router.Group("/", middleware.JWTAuth())
 	protected.POST("/exercises", ExerciseHandler.CreateExercise)
+	protected.POST("/workouts", WorkoutHandler.CreateWorkout)
+	protected.GET("/workouts", WorkoutHandler.GetWorkouts)
 
 	log.Printf("Listening on port %s...", os.Getenv("LISTEN_ADDR"))
 	if err := router.Run(os.Getenv("LISTEN_ADDR")); err != nil {

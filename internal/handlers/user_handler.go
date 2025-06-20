@@ -33,15 +33,22 @@ func (h *UserHandler) Signup(c *gin.Context) {
 		return
 	}
 
-	// Convert request to user model
-	user := req.ToUser()
-
-	if err := h.userService.CreateUser(user); err != nil {
+	user, err := h.userService.CreateUser(req.Username, req.Email, req.Password)
+	if err != nil {
 		HandleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "User created successfully",
+		"user": gin.H{
+			"id":         user.ID,
+			"username":   user.Username,
+			"email":      user.Email,
+			"created_at": user.CreatedAt,
+			"role":       user.Role,
+		},
+	})
 }
 
 func (h *UserHandler) Login(c *gin.Context) {

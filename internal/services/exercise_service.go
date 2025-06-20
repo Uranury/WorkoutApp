@@ -19,11 +19,20 @@ func NewExerciseService(exerciseRepo repositories.ExerciseRepository) *ExerciseS
 	return &ExerciseService{exerciseRepo: exerciseRepo}
 }
 
-func (s *ExerciseService) GetExercises() ([]models.Exercise, error) {
-	exercises, err := s.exerciseRepo.GetExercises()
+func (s *ExerciseService) GetExercises(muscleGroup string) ([]models.Exercise, error) {
+	var exercises []models.Exercise
+	var err error
+
+	if muscleGroup != "" {
+		exercises, err = s.exerciseRepo.FilterExercisesByMuscleGroup(muscleGroup)
+	} else {
+		exercises, err = s.exerciseRepo.GetExercises()
+	}
+
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, apperror.ErrDatabaseError
 	}
+
 	if len(exercises) == 0 {
 		return []models.Exercise{}, nil
 	}

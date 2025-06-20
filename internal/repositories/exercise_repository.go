@@ -11,6 +11,7 @@ type ExerciseRepository interface {
 	GetExercises() ([]models.Exercise, error)
 	CreateExercise(exercise *models.Exercise) error
 	GetExerciseByName(exerciseName string) (*models.Exercise, error)
+	FilterExercisesByMuscleGroup(muscleGroup string) ([]models.Exercise, error)
 }
 
 type exerciseRepository struct {
@@ -55,4 +56,13 @@ func (r *exerciseRepository) GetExerciseByName(exerciseName string) (*models.Exe
 		return nil, err
 	}
 	return &exercise, nil
+}
+
+func (r *exerciseRepository) FilterExercisesByMuscleGroup(muscleGroup string) ([]models.Exercise, error) {
+	var exercises []models.Exercise
+	err := r.database.Select(&exercises, "SELECT * FROM exercises WHERE muscle_group = $1", muscleGroup)
+	if err != nil {
+		return nil, err
+	}
+	return exercises, nil
 }

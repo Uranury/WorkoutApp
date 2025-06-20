@@ -1,10 +1,14 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Workout struct {
-	ID          string    `db:"id" json:"id"`
-	UserID      string    `db:"user_id" json:"user_id"` // FK to User
+	ID          uuid.UUID `db:"id" json:"id"`
+	UserID      uuid.UUID `db:"user_id" json:"user_id"` // FK to User
 	Name        string    `db:"name" json:"name"`
 	ScheduledAt time.Time `db:"scheduled_at" json:"scheduled_at"`
 	Comment     string    `db:"comment" json:"comment"`
@@ -12,11 +16,22 @@ type Workout struct {
 	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
 }
 
+type WorkoutDTO struct {
+	Name        string    `json:"name"`
+	Comment     string    `json:"comment"`
+	ScheduledAt time.Time `json:"scheduled_at"`
+}
+
 type WorkoutExercise struct {
-	ID         string `db:"id" json:"id"`
-	WorkoutID  string `db:"workout_id" json:"workout_id"`   // FK to Workout
-	ExerciseID string `db:"exercise_id" json:"exercise_id"` // FK to Exercise
-	Sets       int    `db:"sets" json:"sets"`
-	Reps       int    `db:"reps" json:"reps"`
-	Weight     int    `db:"weight" json:"weight"` // kg or lbs, you decide
+	ID         uuid.UUID `db:"id" json:"id"`
+	WorkoutID  uuid.UUID `db:"workout_id" json:"workout_id"`   // FK to Workout
+	ExerciseID uuid.UUID `db:"exercise_id" json:"exercise_id"` // FK to Exercise
+	Sets       int       `db:"sets" json:"sets"`
+	Reps       int       `db:"reps" json:"reps"`
+	Weight     int       `db:"weight" json:"weight"` // kg or lbs, you decide
+}
+
+type FullWorkout struct {
+	Workout
+	Exercises []WorkoutExercise `json:"exercises"`
 }

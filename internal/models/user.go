@@ -23,14 +23,6 @@ type UserCreateRequest struct {
 	Password string `json:"password" binding:"required,min=6"` // Plain password
 }
 
-func (req *UserCreateRequest) ToUser() *User {
-	return &User{
-		Username:     req.Username,
-		Email:        req.Email,
-		PasswordHash: req.Password, // Will be hashed in service
-	}
-}
-
 type UserLoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
