@@ -11,6 +11,7 @@ import (
 type WorkoutRepository interface {
 	CreateWorkout(workout *models.Workout) error
 	GetWorkoutsByUserID(userID uuid.UUID) ([]models.Workout, error)
+	GetWorkoutByID(workoutID uuid.UUID, userID uuid.UUID) (*models.Workout, error)
 	UpdateWorkout(workout *models.Workout) error
 	DeleteWorkout(workout *models.Workout) error
 	GetUpcomingWorkouts(userID uuid.UUID) ([]models.Workout, error)
@@ -49,6 +50,14 @@ func (r *workoutRepository) GetWorkoutsByUserID(userID uuid.UUID) ([]models.Work
 func (r *workoutRepository) GetExistingWorkout(name string, userID uuid.UUID) (*models.Workout, error) {
 	var workout models.Workout
 	if err := r.database.Get(&workout, "SELECT * FROM workouts WHERE name ILIKE $1 AND user_id = $2", name, userID); err != nil {
+		return nil, err
+	}
+	return &workout, nil
+}
+
+func (r *workoutRepository) GetWorkoutByID(workoutID uuid.UUID, userID uuid.UUID) (*models.Workout, error) {
+	var workout models.Workout
+	if err := r.database.Get(&workout, "SELECT * FROM workouts WHERE id = $1 AND user_id = $2", workoutID, userID); err != nil {
 		return nil, err
 	}
 	return &workout, nil

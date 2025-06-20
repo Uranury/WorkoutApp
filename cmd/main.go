@@ -35,6 +35,8 @@ func main() {
 	protected.POST("/exercises", ExerciseHandler.CreateExercise)
 	protected.POST("/workouts", WorkoutHandler.CreateWorkout)
 	protected.GET("/workouts", WorkoutHandler.GetWorkouts)
+	protected.GET("/workouts/exercises", WorkoutHandler.GetFullWorkout)
+	protected.POST("/workouts/:workoutID/exercises", WorkoutHandler.AddExerciseToWorkout)
 
 	log.Printf("Listening on port %s...", os.Getenv("LISTEN_ADDR"))
 	if err := router.Run(os.Getenv("LISTEN_ADDR")); err != nil {

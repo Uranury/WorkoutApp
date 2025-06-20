@@ -1,5 +1,5 @@
 run:
-	go run .
+	go run ./cmd
 
 create-mig:
 	migrate create -ext sql -dir internal/db/migrations -seq $(name)

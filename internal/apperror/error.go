@@ -55,6 +55,11 @@ var (
 		Message:    "workout already exists",
 		StatusCode: http.StatusConflict,
 	}
+
+	ErrWorkoutNotFound = &AppError{
+		Message:    "workout not found",
+		StatusCode: http.StatusNotFound,
+	}
 )
 
 // Generic errors

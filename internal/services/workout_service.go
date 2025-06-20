@@ -13,11 +13,12 @@ import (
 )
 
 type WorkoutService struct {
-	workoutRepo repositories.WorkoutRepository
+	workoutRepo         repositories.WorkoutRepository
+	workoutExerciseRepo repositories.WorkoutExerciseRepository
 }
 
-func NewWorkoutService(workoutRepo repositories.WorkoutRepository) *WorkoutService {
-	return &WorkoutService{workoutRepo: workoutRepo}
+func NewWorkoutService(workoutRepo repositories.WorkoutRepository, workoutExerciseRepo repositories.WorkoutExerciseRepository) *WorkoutService {
+	return &WorkoutService{workoutRepo: workoutRepo, workoutExerciseRepo: workoutExerciseRepo}
 }
 
 func (s *WorkoutService) CreateWorkout(input models.WorkoutDTO, userID uuid.UUID) error {
@@ -63,4 +64,57 @@ func (s *WorkoutService) GetWorkouts(userID uuid.UUID) ([]models.Workout, error)
 		return []models.Workout{}, nil
 	}
 	return workouts, nil
+}
+
+func (s *WorkoutService) AddExerciseToWorkout(userID uuid.UUID, workoutExercise *models.WorkoutExercise) error {
+	// 1. Make sure the workout exists and belongs to the user
+	_, err := s.workoutRepo.GetWorkoutByID(workoutExercise.WorkoutID, userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return apperror.NewAppError("workout not found", http.StatusNotFound)
+		}
+		return apperror.ErrDatabaseError
+	}
+
+	// 2. Check if this exercise is already linked to this workout
+	existing, err := s.workoutExerciseRepo.GetWorkoutExercise(workoutExercise.WorkoutID, workoutExercise.ExerciseID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return apperror.ErrDatabaseError
+	}
+	if existing != nil {
+		return apperror.NewAppError("exercise already exists in workout", http.StatusConflict)
+	}
+
+	// 3. Add it
+	workoutExercise.ID = uuid.New() // if needed
+	if err := s.workoutExerciseRepo.AddExerciseToWorkout(workoutExercise); err != nil {
+		return apperror.ErrDatabaseError
+	}
+
+	return nil
+}
+
+func (s *WorkoutService) GetFullWorkout(workoutID uuid.UUID, userID uuid.UUID) (*models.FullWorkout, error) {
+	workout, err := s.workoutRepo.GetWorkoutByID(workoutID, userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, apperror.ErrDatabaseError
+	}
+
+	exercises, err := s.workoutExerciseRepo.GetExercisesByWorkoutID(workoutID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, apperror.ErrDatabaseError
+	}
+
+	fullWorkout := &models.FullWorkout{
+		Workout:   *workout,
+		Exercises: exercises,
+	}
+
+	return fullWorkout, nil
 }

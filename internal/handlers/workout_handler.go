@@ -8,6 +8,7 @@ import (
 	"github.com/Uranury/WorkoutApp/internal/models"
 	"github.com/Uranury/WorkoutApp/internal/services"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type WorkoutHandler struct {
@@ -46,4 +47,62 @@ func (h *WorkoutHandler) GetWorkouts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, workouts)
+}
+
+func (h *WorkoutHandler) GetFullWorkout(c *gin.Context) {
+	userID, _ := middleware.GetUserID(c)
+	workoutIDParam := c.Query("id")
+	workoutID, err := uuid.Parse(workoutIDParam)
+	if err != nil {
+		HandleError(c, &apperror.AppError{Message: "failed to parse workoutID", StatusCode: http.StatusInternalServerError})
+		return
+	}
+
+	fullWorkout, err := h.workoutService.GetFullWorkout(workoutID, userID)
+	if err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, fullWorkout)
+}
+
+func (h *WorkoutHandler) AddExerciseToWorkout(c *gin.Context) {
+	userID, _ := middleware.GetUserID(c)
+
+	workoutIDParam := c.Param("workoutID")
+	workoutID, err := uuid.Parse(workoutIDParam)
+	if err != nil {
+		HandleError(c, apperror.NewAppError("invalid workout ID", http.StatusBadRequest))
+		return
+	}
+
+	// Only bind the exercise-specific stuff
+	var req struct {
+		ExerciseID uuid.UUID `json:"exercise_id"`
+		Sets       int       `json:"sets"`
+		Reps       int       `json:"reps"`
+		Weight     int       `json:"weight"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		HandleError(c, apperror.ErrBadRequest)
+		return
+	}
+
+	// Construct the full model internally
+	workoutExercise := &models.WorkoutExercise{
+		ID:         uuid.New(),
+		WorkoutID:  workoutID,
+		ExerciseID: req.ExerciseID,
+		Sets:       req.Sets,
+		Reps:       req.Reps,
+		Weight:     req.Weight,
+	}
+
+	if err := h.workoutService.AddExerciseToWorkout(userID, workoutExercise); err != nil {
+		HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "exercise added"})
 }

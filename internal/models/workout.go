@@ -31,7 +31,19 @@ type WorkoutExercise struct {
 	Weight     int       `db:"weight" json:"weight"` // kg or lbs, you decide
 }
 
+type WorkoutExerciseDetail struct {
+	ID          uuid.UUID `db:"id" json:"id"`
+	WorkoutID   uuid.UUID `db:"workout_id" json:"workout_id"`
+	ExerciseID  uuid.UUID `db:"exercise_id" json:"exercise_id"`
+	Sets        int       `db:"sets" json:"sets"`
+	Reps        int       `db:"reps" json:"reps"`
+	Weight      int       `db:"weight" json:"weight"`
+	Name        string    `db:"name" json:"name"`
+	MuscleGroup string    `db:"muscle_group" json:"muscle_group"`
+	Description string    `db:"description" json:"description"`
+}
+
 type FullWorkout struct {
 	Workout
-	Exercises []WorkoutExercise `json:"exercises"`
+	Exercises []WorkoutExerciseDetail `json:"exercises"`
 }
