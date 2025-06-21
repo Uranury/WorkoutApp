@@ -67,7 +67,6 @@ func (s *WorkoutService) GetWorkouts(userID uuid.UUID) ([]models.Workout, error)
 }
 
 func (s *WorkoutService) AddExerciseToWorkout(userID uuid.UUID, workoutExercise *models.WorkoutExercise) error {
-	// 1. Make sure the workout exists and belongs to the user
 	_, err := s.workoutRepo.GetWorkoutByID(workoutExercise.WorkoutID, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -75,8 +74,6 @@ func (s *WorkoutService) AddExerciseToWorkout(userID uuid.UUID, workoutExercise 
 		}
 		return apperror.ErrDatabaseError
 	}
-
-	// 2. Check if this exercise is already linked to this workout
 	existing, err := s.workoutExerciseRepo.GetWorkoutExercise(workoutExercise.WorkoutID, workoutExercise.ExerciseID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return apperror.ErrDatabaseError
@@ -85,8 +82,7 @@ func (s *WorkoutService) AddExerciseToWorkout(userID uuid.UUID, workoutExercise 
 		return apperror.NewAppError("exercise already exists in workout", http.StatusConflict)
 	}
 
-	// 3. Add it
-	workoutExercise.ID = uuid.New() // if needed
+	workoutExercise.ID = uuid.New()
 	if err := s.workoutExerciseRepo.AddExerciseToWorkout(workoutExercise); err != nil {
 		return apperror.ErrDatabaseError
 	}
