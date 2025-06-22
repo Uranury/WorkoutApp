@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -17,15 +16,7 @@ type Config struct {
 func Load() *Config {
 	_ = loadEnv()
 
-	dsn := fmt.Sprintf(
-		"user=%s password=%s dbname=%s host=%s port=%s sslmode=%s",
-		getEnv("POSTGRES_USER", ""),
-		getEnv("POSTGRES_PASSWORD", ""),
-		getEnv("POSTGRES_DB", "workoutapp"),
-		getEnv("DATABASE_HOST", "localhost"),
-		getEnv("DATABASE_PORT", "5434"),
-		getEnv("SSL_MODE", "disable"),
-	)
+	dsn := getEnv("DATABASE_URL", "")
 
 	cfg := &Config{
 		Port:      getEnv("PORT", "4040"),
