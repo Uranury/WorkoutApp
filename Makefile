@@ -9,3 +9,6 @@ migrate-up:
 
 migrate-down:
 	migrate -path internal/db/migrations -database $(DB_URL) down
+
+build:
+	docker-compose up --build

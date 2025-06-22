@@ -22,7 +22,7 @@ type Server struct {
 }
 
 func NewServer(cfg *config.Config) (*Server, error) {
-	database, err := db.InitDB("postgres", cfg.DbUrl)
+	database, err := db.InitDB("postgres", cfg.DbUrl, "internal/db/migrations")
 	if err != nil {
 		return nil, err
 	}

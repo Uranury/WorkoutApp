@@ -29,6 +29,11 @@ func (s *WorkoutService) CreateWorkout(input models.WorkoutDTO, userID uuid.UUID
 		return apperror.NewAppError("scheduled_at must be provided", http.StatusBadRequest)
 	}
 
+	now := time.Now().UTC()
+	if input.ScheduledAt.Before(now) {
+		return apperror.NewAppError("scheduled_at cannot be in the past", http.StatusBadRequest)
+	}
+
 	existingWorkout, err := s.workoutRepo.GetExistingWorkout(input.Name, userID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return apperror.ErrDatabaseError
@@ -37,7 +42,6 @@ func (s *WorkoutService) CreateWorkout(input models.WorkoutDTO, userID uuid.UUID
 		return apperror.ErrWorkoutAlreadyExists
 	}
 
-	now := time.Now().UTC()
 	workout := &models.Workout{
 		ID:          uuid.New(),
 		UserID:      userID,

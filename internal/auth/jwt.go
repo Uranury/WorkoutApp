@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var jwtkey = []byte(os.Getenv("JWT_KEY"))
+var jwtkey = []byte(os.Getenv("JWT_SECRET"))
 
 type Role string
 type Claims = jwt.MapClaims
