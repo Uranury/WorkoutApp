@@ -17,9 +17,9 @@ type Workout struct {
 }
 
 type WorkoutDTO struct {
-	Name        string    `json:"name"`
-	Comment     string    `json:"comment"`
-	ScheduledAt time.Time `json:"scheduled_at"`
+	Name        string    `json:"name" example:"Leg Day"`
+	Comment     string    `json:"comment" example:"Focus on squats and lunges"`
+	ScheduledAt time.Time `json:"scheduled_at" example:"2025-06-27T18:00:00Z"`
 }
 
 type WorkoutExercise struct {

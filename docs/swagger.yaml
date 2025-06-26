@@ -1,0 +1,72 @@
+basePath: /
+definitions:
+  apperror.AppError:
+    properties:
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  models.WorkoutDTO:
+    properties:
+      comment:
+        example: Focus on squats and lunges
+        type: string
+      name:
+        example: Leg Day
+        type: string
+      scheduled_at:
+        example: "2025-06-27T18:00:00Z"
+        type: string
+    type: object
+host: localhost:4040
+info:
+  contact: {}
+  description: This is the backend API for the Workout App
+  title: Workout API
+  version: "1.0"
+paths:
+  /workouts:
+    post:
+      consumes:
+      - application/json
+      description: Creates a workout for the authenticated user
+      parameters:
+      - description: Workout input
+        in: body
+        name: workout
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkoutDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Create a new workout
+      tags:
+      - workouts
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

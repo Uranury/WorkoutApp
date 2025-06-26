@@ -7,6 +7,14 @@ import (
 	"github.com/Uranury/WorkoutApp/config"
 )
 
+// @title Workout API
+// @version 1.0
+// @description This is the backend API for the Workout App
+// @host localhost:4040
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	cfg := config.Load()
 

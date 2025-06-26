@@ -19,6 +19,18 @@ func NewWorkoutHandler(workoutService *services.WorkoutService) *WorkoutHandler 
 	return &WorkoutHandler{workoutService: workoutService}
 }
 
+// @Summary Create a new workout
+// @Description Creates a workout for the authenticated user
+// @Tags workouts
+// @Accept json
+// @Produce json
+// @Param workout body models.WorkoutDTO true "Workout input"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} apperror.AppError
+// @Failure 401 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Security BearerAuth
+// @Router /workouts [post]
 func (h *WorkoutHandler) CreateWorkout(c *gin.Context) {
 	var workoutInput models.WorkoutDTO
 

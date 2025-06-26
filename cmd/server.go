@@ -4,12 +4,15 @@ import (
 	"log"
 
 	"github.com/Uranury/WorkoutApp/config"
+	_ "github.com/Uranury/WorkoutApp/docs"
 	"github.com/Uranury/WorkoutApp/internal/db"
 	"github.com/Uranury/WorkoutApp/internal/handlers"
 	"github.com/Uranury/WorkoutApp/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Server struct {
@@ -43,6 +46,9 @@ func NewServer(cfg *config.Config) (*Server, error) {
 }
 
 func (s *Server) setupRoutes() {
+
+	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// Public routes
 	s.router.POST("/signup", s.userHandler.Signup)
 	s.router.POST("/login", s.userHandler.Login)
