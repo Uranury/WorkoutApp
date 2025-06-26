@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:4040",
+    "host": "workoutapp-production-29ed.up.railway.app",
     "basePath": "/",
     "paths": {
         "/workouts": {

@@ -10,7 +10,7 @@ import (
 // @title Workout API
 // @version 1.0
 // @description This is the backend API for the Workout App
-// @host localhost:4040
+// @host workoutapp-production-29ed.up.railway.app
 // @BasePath /
 // @securityDefinitions.apikey BearerAuth
 // @in header

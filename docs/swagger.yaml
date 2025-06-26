@@ -19,7 +19,7 @@ definitions:
         example: "2025-06-27T18:00:00Z"
         type: string
     type: object
-host: localhost:4040
+host: workoutapp-production-29ed.up.railway.app
 info:
   contact: {}
   description: This is the backend API for the Workout App
