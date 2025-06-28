@@ -4,8 +4,149 @@ definitions:
     properties:
       message:
         type: string
-      statusCode:
+      status_code:
         type: integer
+    type: object
+  auth.Role:
+    enum:
+    - admin
+    - user
+    type: string
+    x-enum-varnames:
+    - Admin
+    - User
+  models.AddExerciseToWorkoutDTO:
+    properties:
+      exercise_id:
+        example: b5c3a6b6-2a5f-4d0d-9f39-2df5df45c2a3
+        type: string
+      reps:
+        example: 10
+        type: integer
+      sets:
+        example: 3
+        type: integer
+      weight:
+        example: 50
+        type: integer
+    type: object
+  models.Exercise:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      muscle_group:
+        type: string
+      name:
+        type: string
+    type: object
+  models.FullWorkout:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      exercises:
+        items:
+          $ref: '#/definitions/models.WorkoutExerciseDetail'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      scheduled_at:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        description: FK to User
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        $ref: '#/definitions/auth.Role'
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserCreateRequest:
+    properties:
+      email:
+        type: string
+      password:
+        description: Plain password
+        minLength: 6
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  models.UserInner:
+    properties:
+      created_at:
+        example: "2025-06-27T18:00:00Z"
+        type: string
+      email:
+        example: johndoe@example.com
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/auth.Role'
+        example: user
+      username:
+        example: johndoe
+        type: string
+    type: object
+  models.UserLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.UserResponse:
+    properties:
+      message:
+        example: User created successfully
+        type: string
+      user:
+        $ref: '#/definitions/models.UserInner'
+    type: object
+  models.Workout:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      scheduled_at:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        description: FK to User
+        type: string
     type: object
   models.WorkoutDTO:
     properties:
@@ -19,6 +160,27 @@ definitions:
         example: "2025-06-27T18:00:00Z"
         type: string
     type: object
+  models.WorkoutExerciseDetail:
+    properties:
+      description:
+        type: string
+      exercise_id:
+        type: string
+      id:
+        type: string
+      muscle_group:
+        type: string
+      name:
+        type: string
+      reps:
+        type: integer
+      sets:
+        type: integer
+      weight:
+        type: integer
+      workout_id:
+        type: string
+    type: object
 host: workoutapp-production-29ed.up.railway.app
 info:
   contact: {}
@@ -26,7 +188,144 @@ info:
   title: Workout API
   version: "1.0"
 paths:
+  /exercises:
+    get:
+      parameters:
+      - description: Filter by muscle group
+        in: query
+        name: muscle_group
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Exercise'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Retrieve all existing exercises, optionally filter by muscle group
+      tags:
+      - exercises
+  /login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Login as an existing user
+      tags:
+      - users
+  /signup:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Create a new user
+      tags:
+      - users
+  /users:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      summary: Retrieve all existing users
+      tags:
+      - users
   /workouts:
+    get:
+      description: Returns a list of all workouts a user has
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Workout'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Get all workouts of the user
+      tags:
+      - workouts
     post:
       consumes:
       - application/json
@@ -62,6 +361,85 @@ paths:
       security:
       - BearerAuth: []
       summary: Create a new workout
+      tags:
+      - workouts
+  /workouts/{workoutID}/exercises:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Workout ID (UUID)
+        in: path
+        name: workoutID
+        required: true
+        type: string
+      - description: Exercise details
+        in: body
+        name: exercise
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddExerciseToWorkoutDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Add an exercise to an existing workout
+      tags:
+      - workouts
+  /workouts/exercises:
+    get:
+      description: Returns detailed information about a specific workout by ID
+      parameters:
+      - description: Workout ID (UUID)
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FullWorkout'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperror.AppError'
+      security:
+      - BearerAuth: []
+      summary: Get a workout with all its details
       tags:
       - workouts
 securityDefinitions:

@@ -28,7 +28,7 @@ func (s *UserService) CreateUser(username, email, plainPassword string) (*models
 	plainPassword = strings.TrimSpace(plainPassword)
 
 	if username == "" || email == "" || plainPassword == "" {
-		return nil, apperror.ErrInvalidCredentials
+		return nil, apperror.ErrBadRequest
 	}
 
 	existingUser, err := s.userRepo.GetUserByEmail(email)

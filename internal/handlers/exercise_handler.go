@@ -17,6 +17,14 @@ func NewExerciseHandler(exerciseService *services.ExerciseService) *ExerciseHand
 	return &ExerciseHandler{exerciseService: exerciseService}
 }
 
+// GetExercises godoc
+// @Summary Retrieve all existing exercises, optionally filter by muscle group
+// @Tags exercises
+// @Produce json
+// @Param muscle_group query string false "Filter by muscle group"
+// @Success 200 {array} models.Exercise
+// @Failure 500 {object} apperror.AppError
+// @Router /exercises [get]
 func (h *ExerciseHandler) GetExercises(c *gin.Context) {
 	muscleGroup := c.Query("muscle_group")
 	exercises, err := h.exerciseService.GetExercises(muscleGroup)

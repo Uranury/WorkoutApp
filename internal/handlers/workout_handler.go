@@ -19,6 +19,7 @@ func NewWorkoutHandler(workoutService *services.WorkoutService) *WorkoutHandler 
 	return &WorkoutHandler{workoutService: workoutService}
 }
 
+// CreateWorkout godoc
 // @Summary Create a new workout
 // @Description Creates a workout for the authenticated user
 // @Tags workouts
@@ -49,6 +50,16 @@ func (h *WorkoutHandler) CreateWorkout(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Workout created"})
 }
 
+// GetWorkouts godoc
+// @Summary Get all workouts of the user
+// @Description Returns a list of all workouts a user has
+// @Tags workouts
+// @Produce json
+// @Success 200 {array} models.Workout
+// @Failure 404 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Security BearerAuth
+// @Router /workouts [get]
 func (h *WorkoutHandler) GetWorkouts(c *gin.Context) {
 	userID, _ := middleware.GetUserID(c)
 
@@ -61,12 +72,24 @@ func (h *WorkoutHandler) GetWorkouts(c *gin.Context) {
 	c.JSON(http.StatusOK, workouts)
 }
 
+// GetFullWorkout godoc
+// @Summary Get a workout with all its details
+// @Description Returns detailed information about a specific workout by ID
+// @Tags workouts
+// @Produce json
+// @Param id query string true "Workout ID (UUID)"
+// @Success 200 {object} models.FullWorkout
+// @Failure 400 {object} apperror.AppError
+// @Failure 404 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Security BearerAuth
+// @Router /workouts/exercises [get]
 func (h *WorkoutHandler) GetFullWorkout(c *gin.Context) {
 	userID, _ := middleware.GetUserID(c)
 	workoutIDParam := c.Query("id")
 	workoutID, err := uuid.Parse(workoutIDParam)
 	if err != nil {
-		HandleError(c, &apperror.AppError{Message: "failed to parse workoutID", StatusCode: http.StatusInternalServerError})
+		HandleError(c, &apperror.AppError{Message: "failed to parse workoutID", StatusCode: http.StatusBadRequest})
 		return
 	}
 
@@ -79,6 +102,20 @@ func (h *WorkoutHandler) GetFullWorkout(c *gin.Context) {
 	c.JSON(http.StatusOK, fullWorkout)
 }
 
+// AddExerciseToWorkout godoc
+// @Summary Add an exercise to an existing workout
+// @Tags workouts
+// @Accept json
+// @Produce json
+// @Param workoutID path string true "Workout ID (UUID)"
+// @Param exercise body models.AddExerciseToWorkoutDTO true "Exercise details"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} apperror.AppError
+// @Failure 404 {object} apperror.AppError
+// @Failure 500 {object} apperror.AppError
+// @Failure 409 {object} apperror.AppError
+// @Security BearerAuth
+// @Router /workouts/{workoutID}/exercises [post]
 func (h *WorkoutHandler) AddExerciseToWorkout(c *gin.Context) {
 	userID, _ := middleware.GetUserID(c)
 
@@ -90,12 +127,7 @@ func (h *WorkoutHandler) AddExerciseToWorkout(c *gin.Context) {
 	}
 
 	// Only bind the exercise-specific stuff
-	var req struct {
-		ExerciseID uuid.UUID `json:"exercise_id"`
-		Sets       int       `json:"sets"`
-		Reps       int       `json:"reps"`
-		Weight     int       `json:"weight"`
-	}
+	var req models.AddExerciseToWorkoutDTO
 	if err := c.ShouldBindJSON(&req); err != nil {
 		HandleError(c, apperror.ErrBadRequest)
 		return

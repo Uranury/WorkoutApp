@@ -3,8 +3,8 @@ package apperror
 import "net/http"
 
 type AppError struct {
-	Message    string
-	StatusCode int
+	Message    string `json:"message"`
+	StatusCode int    `json:"status_code"`
 }
 
 func (e *AppError) Error() string {
