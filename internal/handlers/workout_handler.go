@@ -57,6 +57,7 @@ func (h *WorkoutHandler) CreateWorkout(c *gin.Context) {
 // @Produce json
 // @Success 200 {array} models.Workout
 // @Failure 404 {object} apperror.AppError
+// @Failure 401 {object} apperror.AppError
 // @Failure 500 {object} apperror.AppError
 // @Security BearerAuth
 // @Router /workouts [get]

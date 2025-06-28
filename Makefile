@@ -1,3 +1,5 @@
+.PHONY: run create-mig migrate-up migrate-down build test-services
+
 run:
 	go run ./cmd
 
@@ -12,3 +14,7 @@ migrate-down:
 
 build:
 	docker-compose up --build
+
+test-services:
+	cd internal/services && go test -v
+
